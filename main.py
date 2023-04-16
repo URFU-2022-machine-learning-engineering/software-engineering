@@ -1,20 +1,21 @@
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
-from datasets import load_dataset
+import whisper
 
-# load model and processor
-processor = WhisperProcessor.from_pretrained("openai/whisper-medium")
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium")
-model.config.forced_decoder_ids = None
+model = whisper.load_model("large")
 
-# load dummy dataset and read audio files
-ds = load_dataset("hf-internal-testing/librispeech_asr_dummy", "clean", split="validation")
-sample = ds[0]["audio"]
-input_features = processor(sample["array"], sampling_rate=sample["sampling_rate"], return_tensors="pt").input_features 
+# load audio and pad/trim it to fit 30 seconds
+audio = whisper.load_audio("/home/dzailz/Documents/russian.mp3")
+audio = whisper.pad_or_trim(audio)
 
-# generate token ids
-predicted_ids = model.generate(input_features)
-# decode token ids to text
-transcription = processor.batch_decode(predicted_ids, skip_special_tokens=False)
+# make log-Mel spectrogram and move to the same device as the model
+mel = whisper.log_mel_spectrogram(audio).to(model.device)
 
-transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)
+# detect the spoken language
+_, probs = model.detect_language(mel)
+print(f"Detected language: {max(probs, key=probs.get)}")
 
+# decode the audio
+options = whisper.DecodingOptions(fp16=False)
+result = whisper.decode(model, mel, options)
+
+# print the recognized text
+print(result.text)
