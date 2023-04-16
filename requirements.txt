@@ -1,5 +1,1 @@
-transformers
-torch
-datasets
-soundfile
-librosa
+whisper==1.1.10
