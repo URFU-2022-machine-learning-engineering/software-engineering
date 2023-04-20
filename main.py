@@ -1,10 +1,13 @@
+import torch
+
 import whisper
 from minio import Minio
 import io
 
 
 class WhisperTranscriber:
-    def __init__(self, model_name, minio_endpoint, minio_access_key, minio_secret_key, minio_bucket):
+    def __init__(self, model_name: str, minio_endpoint: str, minio_access_key: str, minio_secret_key: str,
+                 minio_bucket: str):
         self.model = whisper.load_model(model_name)
         self.minio_client = Minio(
             minio_endpoint,
@@ -13,7 +16,7 @@ class WhisperTranscriber:
         )
         self.bucket = minio_bucket
 
-    def transcribe_audio(self, object_name):
+    def transcribe_audio(self, object_name: str) -> tuple[str, str]:
         # get log-Mel spectrogram from Minio
         mel = self._get_log_mel_spectrogram(object_name)
         # detect the spoken language
@@ -24,7 +27,7 @@ class WhisperTranscriber:
         result = whisper.decode(self.model, mel, options)
         return language, result.text
 
-    def _get_log_mel_spectrogram(self, object_name):
+    def _get_log_mel_spectrogram(self, object_name: str) -> torch.Tensor:
         # get object from Minio
         object_data = self.minio_client.get_object(self.bucket, object_name)
         # read object data into memory
