@@ -3,8 +3,10 @@
 This project is a transcription service built using FastAPI. It transcribes audio files using the WhisperTranscriber model.
 ## Installation
 
-    Clone the repository: git clone https://github.com/URFU-2022-machine-learning-engineering/whisper-speech-recogniniton.git
-    Install the required dependencies: pip install -r requirements.txt
+1. Clone the repository: git clone https://github.com/URFU-2022-machine-learning-engineering/whisper-speech-recogniniton.git
+2. Navigate to the project directory: `cd whisper-speech-recogniniton`
+3. Install Poetry (if not already installed): [Poetry Installation Guide](https://python-poetry.org/docs/)
+4. Install the project dependencies using Poetry: poetry install
 
 ## Configuration
 
