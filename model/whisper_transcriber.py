@@ -1,23 +1,30 @@
-import os
-import torch
-import tempfile
 import logging
+import os
+import tempfile
 
+import torch
 import whisper
 from minio import Minio
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class WhisperTranscriber:
-    def __init__(self, model_name: str, minio_endpoint: str, minio_access_key: str, minio_secret_key: str,
-                 minio_bucket: str, minio_use_ssl: bool | str):
+    def __init__(
+        self,
+        model_name: str,
+        minio_endpoint: str,
+        minio_access_key: str,
+        minio_secret_key: str,
+        minio_bucket: str,
+        minio_use_ssl: bool | str,
+    ):
         self.model = whisper.load_model(model_name)
         self.minio_client = Minio(
             minio_endpoint,
             access_key=minio_access_key,
             secret_key=minio_secret_key,
-            secure=minio_use_ssl
+            secure=minio_use_ssl,
         )
         self.bucket = minio_bucket
 
@@ -65,14 +72,15 @@ class WhisperTranscriber:
 
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
     from pathlib import Path
+
+    from dotenv import load_dotenv
 
     dotenv_path = Path("../.env.local")
     load_dotenv(dotenv_path=dotenv_path)
 
     # Configure logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     transcriber = WhisperTranscriber(
         model_name="large",
@@ -80,7 +88,7 @@ if __name__ == "__main__":
         minio_access_key=os.getenv("MINIO_ACCESS_KEY"),
         minio_secret_key=os.getenv("MINIO_SECRET_KEY"),
         minio_bucket=os.getenv("MINIO_BUCKET"),
-        minio_use_ssl=False
+        minio_use_ssl=False,
     )
 
     language, text = transcriber.transcribe_audio("audio.mp3")

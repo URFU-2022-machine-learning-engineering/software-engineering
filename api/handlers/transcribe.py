@@ -1,12 +1,12 @@
-import os
 import logging
-
-from model import WhisperTranscriber
-from api.spec.transcribe import TranscribeResponse, TranscribeRequest
-from fastapi import APIRouter, status
+import os
+from pathlib import Path
 
 from dotenv import load_dotenv
-from pathlib import Path
+from fastapi import APIRouter, status
+
+from api.spec.transcribe import TranscribeRequest, TranscribeResponse
+from model import WhisperTranscriber
 
 logger = logging.getLogger(name=__name__)
 router = APIRouter()
@@ -34,7 +34,7 @@ def transcribe(req: TranscribeRequest) -> TranscribeResponse | None:
             minio_access_key=minio_access_key,
             minio_secret_key=minio_secret_key,
             minio_bucket=req.bucket,
-            minio_use_ssl=minio_use_ssl
+            minio_use_ssl=minio_use_ssl,
         )
     except TypeError as err:
         logger.error(f"Could not initialize WT. Error was: {err}")
