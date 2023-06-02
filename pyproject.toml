@@ -26,6 +26,8 @@ priority = "explicit"
 flake8 = "^6.0.0"
 black = "^23.3.0"
 isort = "^5.12.0"
+pytest = "^7.3.1"
+httpx = "^0.24.1"
 
 [build-system]
 requires = ["poetry-core"]
