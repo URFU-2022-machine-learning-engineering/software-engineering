@@ -5,13 +5,12 @@ description = "This project is a transcription service built using FastAPI. It t
 authors = ["Vladimir Katin <katin.v.v@gmail.com>"]
 license = "GNU GPL v3"
 readme = "README.md"
-packages = [{include = "whisper_speech_recogniniton"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
 openai-whisper = "^20230314"
 minio = "7.1.15"
-fastapi = "0.95.2"
+fastapi = "0.96.0"
 uvicorn = "0.22.0"
 pydantic = "1.10.8"
 python-dotenv = "1.0.0"

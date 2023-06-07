@@ -1,0 +1,9 @@
+.venv
+.pytest_cache
+.env.local
+.github
+.idea
+README.md
+setup.cfg
+.pre-commit-config.yaml
+.gitignore
