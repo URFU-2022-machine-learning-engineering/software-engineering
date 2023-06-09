@@ -26,7 +26,7 @@ pipeline {
 
     stage('run') {
       steps {
-        sh 'docker run -d --env-file /var/sr-api/.env.local --name sr-api -p 8000:8000 --rm ${IMAGE}'
+        sh 'docker run -d --env-file /var/whisper/.env --name sr-api -p 8000:8000 --rm ${IMAGE}'
       }
     }
 
