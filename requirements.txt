@@ -1,7 +1,7 @@
 openai-whisper==20230314
-minio==7.1.15
+minio==7.1.16
 torch==2.0.1
-fastapi==0.95.2
-uvicorn==0.22.0
-pydantic==1.10.8
+fastapi==0.101.1
+uvicorn==0.23.2
+pydantic==2.3.0
 python-dotenv==1.0.0

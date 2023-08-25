@@ -18,7 +18,7 @@ model_name = "medium"
 minio_endpoint = os.getenv("MINIO_ENDPOINT")
 minio_access_key = os.getenv("MINIO_ACCESS_KEY")
 minio_secret_key = os.getenv("MINIO_SECRET_KEY")
-minio_use_ssl = False
+minio_use_ssl = True
 
 logger.debug(f"minio_endpoint: {minio_endpoint}")
 
