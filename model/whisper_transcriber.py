@@ -30,6 +30,7 @@ class WhisperTranscriber:
     def transcribe_audio(self, object_name: str) -> tuple[str, str]:
         temp_file_path = self._get_file_from_minio(object_name)
         try:
+            logging.debug("Start transcription")
             result = self.model.transcribe(temp_file_path, fp16=False)
         finally:
             os.remove(temp_file_path)
