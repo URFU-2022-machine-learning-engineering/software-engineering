@@ -30,14 +30,15 @@ class WhisperTranscriber:
     def transcribe_audio(self, object_name: str) -> tuple[str, str]:
         temp_file_path = self._get_file_from_minio(object_name)
         try:
-            logging.debug("Start transcription")
+            logging.info("Start transcription")
             result = self.model.transcribe(temp_file_path, fp16=False)
         finally:
             os.remove(temp_file_path)
+            logging.debug("Removed temp file")
         return result["language"], result["text"]
 
     def _get_file_from_minio(self, object_name: str) -> str:
-        logging.debug("get object from Minio")
+        logging.info("get object from S3")
         try:
             object_data = self.minio_client.get_object(self.bucket, object_name)
 

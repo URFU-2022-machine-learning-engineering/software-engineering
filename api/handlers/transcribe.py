@@ -20,12 +20,12 @@ minio_access_key = os.getenv("MINIO_ACCESS_KEY")
 minio_secret_key = os.getenv("MINIO_SECRET_KEY")
 minio_use_ssl = bool(int(os.getenv("MINIO_USE_SSL")))
 
-logger.debug(f"minio_endpoint: {minio_endpoint}")
+logger.debug(f"minio_endpoint: {minio_endpoint}, use ssl is {minio_use_ssl}")
 
 
 @router.post("/transcribe", response_model=TranscribeResponse, status_code=status.HTTP_200_OK)
 def transcribe(req: TranscribeRequest) -> TranscribeResponse | None:
-    logger.debug(req)
+    logger.debug(f"Received request {req}")
     try:
         logger.info("Initialize WT")
         whisper = WhisperTranscriber(
