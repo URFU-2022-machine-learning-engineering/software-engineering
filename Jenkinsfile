@@ -26,7 +26,7 @@ pipeline {
 
     stage('run') {
       steps {
-        sh 'docker run -d --env-file /var/whisper/.env --name "${CONTAINER_NAME}" -p 8000:8000 --rm "${IMAGE}"'
+        sh 'docker run -d --env-file /var/whisper/.env --name "${CONTAINER_NAME}" --volume ~/models:/root/.cache/whisper/ -p 8000:8000 --rm "${IMAGE}"'
       }
     }
 
