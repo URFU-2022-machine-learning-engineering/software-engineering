@@ -3,6 +3,7 @@ pipeline {
     environment {
         IMAGE           = 'dzailz/whisper-api:latest'
         CONTAINER_NAME  = 'whisper-api'
+        MODELS_FOLDER   = '/var/whisper/whisper_models/models'
     }
 
   stages {
@@ -26,7 +27,7 @@ pipeline {
 
     stage('run') {
       steps {
-        sh 'docker run -d --env-file /var/whisper/.env --name "${CONTAINER_NAME}" --volume /var/whisper/whisper_models/models:/root/.cache/whisper/ -p 8000:8000 --rm "${IMAGE}"'
+        sh 'docker run -d --env-file /var/whisper/.env --name "${CONTAINER_NAME}" --volume "${MODELS_FOLDER}":/root/.cache/whisper/ -p 8000:8000 --rm "${IMAGE}"'
       }
     }
 
