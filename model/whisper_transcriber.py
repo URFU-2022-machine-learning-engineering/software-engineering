@@ -5,8 +5,6 @@ import tempfile
 import whisper
 from minio import Minio
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
-
 
 class WhisperTranscriber:
     def __init__(
