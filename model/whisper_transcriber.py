@@ -2,7 +2,6 @@ import logging
 import os
 import tempfile
 
-import torch
 import whisper
 from minio import Minio
 
@@ -29,21 +28,17 @@ class WhisperTranscriber:
         self.bucket = minio_bucket
 
     def transcribe_audio(self, object_name: str) -> tuple[str, str]:
-        logging.debug("get log-Mel spectrogram from Minio")
-        mel = self._get_log_mel_spectrogram(object_name)
+        temp_file_path = self._get_file_from_minio(object_name)
+        try:
+            logging.info("Start transcription")
+            result = self.model.transcribe(temp_file_path, fp16=False)
+        finally:
+            os.remove(temp_file_path)
+            logging.debug("Removed temp file")
+        return result["language"], result["text"]
 
-        logging.debug("detect the spoken language")
-        _, probs = self.model.detect_language(mel)
-        language = max(probs, key=probs.get)
-
-        logging.debug("decode the audio")
-        options = whisper.DecodingOptions(fp16=False)
-        result = whisper.decode(self.model, mel, options)
-        logging.debug(f"return language {language} and {result.text}")
-        return language, result.text
-
-    def _get_log_mel_spectrogram(self, object_name: str) -> torch.Tensor:
-        logging.debug("get object from Minio")
+    def _get_file_from_minio(self, object_name: str) -> str:
+        logging.info("get object from S3")
         try:
             object_data = self.minio_client.get_object(self.bucket, object_name)
 
@@ -57,18 +52,7 @@ class WhisperTranscriber:
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(object_bytes)
             temp_file_path = temp_file.name
-
-        logging.debug(" load audio and pad/trim it to fit 30 seconds")
-        audio = whisper.load_audio(temp_file_path)
-        audio = whisper.pad_or_trim(audio)
-
-        logging.debug("make log-Mel spectrogram and move to the same device as the model")
-        mel = whisper.log_mel_spectrogram(audio).to(self.model.device)
-
-        logging.debug("Delete the temporary file")
-        os.remove(temp_file_path)
-
-        return mel
+            return temp_file_path
 
 
 if __name__ == "__main__":
@@ -88,7 +72,7 @@ if __name__ == "__main__":
         minio_access_key=os.getenv("MINIO_ACCESS_KEY"),
         minio_secret_key=os.getenv("MINIO_SECRET_KEY"),
         minio_bucket=os.getenv("MINIO_BUCKET"),
-        minio_use_ssl=False,
+        minio_use_ssl=bool(int(os.getenv("MINIO_USE_SSL"))),
     )
 
     language, text = transcriber.transcribe_audio("audio.mp3")
