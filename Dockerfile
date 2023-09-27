@@ -1,9 +1,9 @@
 FROM python:3.11
-LABEL authors="dzailz"
+LABEL authors="Vladimir Katin"
 
 ENV HOST="0.0.0.0"
 ENV PORT="8000"
-ENV POETRY_VERSION="1.5.1"
+ENV POETRY_VERSION="1.6.1"
 
 RUN apt update -y  \
     && apt install -y ffmpeg
