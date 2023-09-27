@@ -4,8 +4,8 @@ from fastapi import FastAPI
 
 from api.handlers import transcribe
 
-logger = logging.getLogger(name=__name__)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s", filename="/var/logs/whisper.log")
+logging.getLogger(name=__name__)
 
 app = FastAPI()
 

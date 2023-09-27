@@ -1,9 +1,9 @@
+import logging
 import os
 
 from fastapi import APIRouter, status
 
 from api.spec.transcribe import TranscribeRequest, TranscribeResponse
-from main import logger
 from model import WhisperTranscriber
 
 router = APIRouter()
@@ -15,7 +15,7 @@ minio_secret_key = os.getenv("MINIO_SECRET_KEY")
 minio_use_ssl = bool(int(os.getenv("MINIO_USE_SSL"))) if os.getenv("MINIO_USE_SSL") else True
 
 
-logger.debug(f"minio_endpoint: {minio_endpoint}, use ssl is {minio_use_ssl}")
+logging.debug(f"minio_endpoint: {minio_endpoint}, use ssl is {minio_use_ssl}")
 
 
 @router.post(
@@ -24,9 +24,9 @@ logger.debug(f"minio_endpoint: {minio_endpoint}, use ssl is {minio_use_ssl}")
     status_code=status.HTTP_200_OK,
 )
 def transcribe(req: TranscribeRequest) -> TranscribeResponse | None:
-    logger.debug(f"Received request {req}")
+    logging.debug(f"Received request {req}")
     try:
-        logger.info("Initialize WT")
+        logging.info("Initialize WT")
         whisper = WhisperTranscriber(
             model_name=model_name,
             minio_endpoint=minio_endpoint,
@@ -36,7 +36,7 @@ def transcribe(req: TranscribeRequest) -> TranscribeResponse | None:
             minio_use_ssl=minio_use_ssl,
         )
     except TypeError as err:
-        logger.error(f"Could not initialize WT. Error was: {err}")
+        logging.error(f"Could not initialize WT. Error was: {err}")
         return
     language, text = whisper.transcribe_audio(object_name=req.file_name)
 
