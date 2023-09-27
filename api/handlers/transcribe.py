@@ -1,12 +1,11 @@
-import logging
 import os
 
 from fastapi import APIRouter, status
 
 from api.spec.transcribe import TranscribeRequest, TranscribeResponse
+from main import logger
 from model import WhisperTranscriber
 
-logger = logging.getLogger(name=__name__)
 router = APIRouter()
 
 model_name = "medium"
@@ -18,7 +17,11 @@ minio_use_ssl = bool(int(os.getenv("MINIO_USE_SSL"))) if os.getenv("MINIO_USE_SS
 logger.debug(f"minio_endpoint: {minio_endpoint}, use ssl is {minio_use_ssl}")
 
 
-@router.post("/transcribe", response_model=TranscribeResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/transcribe",
+    response_model=TranscribeResponse,
+    status_code=status.HTTP_200_OK,
+)
 def transcribe(req: TranscribeRequest) -> TranscribeResponse | None:
     logger.debug(f"Received request {req}")
     try:

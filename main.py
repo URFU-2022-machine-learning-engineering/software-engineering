@@ -1,6 +1,11 @@
+import logging
+
 from fastapi import FastAPI
 
 from api.handlers import transcribe
+
+logger = logging.getLogger(name=__name__)
+logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
 
