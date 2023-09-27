@@ -14,6 +14,7 @@ minio_access_key = os.getenv("MINIO_ACCESS_KEY")
 minio_secret_key = os.getenv("MINIO_SECRET_KEY")
 minio_use_ssl = bool(int(os.getenv("MINIO_USE_SSL"))) if os.getenv("MINIO_USE_SSL") else True
 
+
 logger.debug(f"minio_endpoint: {minio_endpoint}, use ssl is {minio_use_ssl}")
 
 

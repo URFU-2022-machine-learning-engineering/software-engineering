@@ -3,7 +3,9 @@
 .env.local
 .github
 .idea
+tests
 README.md
 setup.cfg
 .pre-commit-config.yaml
 .gitignore
+Jenkinsfile
