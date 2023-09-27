@@ -1,29 +1,28 @@
-import logging
 import os
-from pathlib import Path
 
-from dotenv import load_dotenv
 from fastapi import APIRouter, status
 
 from api.spec.transcribe import TranscribeRequest, TranscribeResponse
+from main import logger
 from model import WhisperTranscriber
 
-logger = logging.getLogger(name=__name__)
 router = APIRouter()
-
-dotenv_path = Path(".env.local")
-load_dotenv(dotenv_path=dotenv_path)
 
 model_name = "medium"
 minio_endpoint = os.getenv("MINIO_ENDPOINT")
 minio_access_key = os.getenv("MINIO_ACCESS_KEY")
 minio_secret_key = os.getenv("MINIO_SECRET_KEY")
-minio_use_ssl = bool(int(os.getenv("MINIO_USE_SSL")))
+minio_use_ssl = bool(int(os.getenv("MINIO_USE_SSL"))) if os.getenv("MINIO_USE_SSL") else True
+
 
 logger.debug(f"minio_endpoint: {minio_endpoint}, use ssl is {minio_use_ssl}")
 
 
-@router.post("/transcribe", response_model=TranscribeResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/transcribe",
+    response_model=TranscribeResponse,
+    status_code=status.HTTP_200_OK,
+)
 def transcribe(req: TranscribeRequest) -> TranscribeResponse | None:
     logger.debug(f"Received request {req}")
     try:
