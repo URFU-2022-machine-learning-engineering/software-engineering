@@ -38,7 +38,7 @@ pipeline {
         max_attempts=10
 
         until { curl --output /dev/null --silent --get --fail http://127.0.0.1:8000; } do
-            if [ ${attempt_counter} -eq ${max_attempts} ];then
+            if [ ${attempt_counter} -eq ${max_attempts} ]; then
               echo "Max attempts reached"
               exit 1
             fi
