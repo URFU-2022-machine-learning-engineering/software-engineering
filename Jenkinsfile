@@ -1,37 +1,19 @@
 pipeline {
   agent { label 'swiss' }
-    environment {
-        IMAGE           = 'dzailz/whisper-api:latest'
-        CONTAINER_NAME  = 'whisper-api'
-        MODELS_FOLDER   = '/var/whisper/whisper_models/models'
-    }
-
   stages {
     stage('prepare') {
     steps {
-      sh '''
-        docker_image_id=$(docker images -q "${IMAGE}")
-
-        if [ -n "$docker_image_id" ]; then
-            if [ "$(docker stop ${CONTAINER_NAME})" ]; then
-                echo "container stopped"
-            fi
-
-            if [ "$(docker rmi "$docker_image_id" -f)" ]; then
-                echo "image removed"
-            fi
-        fi
-      '''
+      sh 'docker compose down -v'
       }
     }
 
     stage('run') {
       steps {
-        sh 'docker run -d --env-file /var/whisper/.env --name "${CONTAINER_NAME}" --volume "${MODELS_FOLDER}":/root/.cache/whisper/ --volume /var/whisper/logs/:/var/log/whisper.log -p 8000:8000 --rm "${IMAGE}"'
+        sh 'docker compose run -d --rm --env-file /var/whisper/.env compose.yml'
       }
     }
 
-    stage('test') {
+    stage('heath-check') {
       steps {
         sh '''
         attempt_counter=0
