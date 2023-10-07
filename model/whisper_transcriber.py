@@ -1,56 +1,24 @@
 import logging
 import os
-import tempfile
 
 import whisper
-from minio import Minio
+
+from connectors import remove_temp_file, save_temp_file
+from connectors.minio_connector import MinioClient
 
 
 class WhisperTranscriber:
-    def __init__(
-        self,
-        model_name: str,
-        minio_endpoint: str,
-        minio_access_key: str,
-        minio_secret_key: str,
-        minio_bucket: str,
-        minio_use_ssl: bool | str,
-    ):
+    def __init__(self, model_name: str):
         self.model = whisper.load_model(model_name)
-        self.minio_client = Minio(
-            minio_endpoint,
-            access_key=minio_access_key,
-            secret_key=minio_secret_key,
-            secure=minio_use_ssl,
-        )
-        self.bucket = minio_bucket
 
-    def transcribe_audio(self, object_name: str) -> tuple[str, str]:
-        temp_file_path = self._get_file_from_minio(object_name)
+    def transcribe_audio_file(self, audio_file_path: str) -> tuple[str, str] | None:
         try:
-            logging.info("Start transcription")
-            result = self.model.transcribe(temp_file_path, fp16=False)
-        finally:
-            os.remove(temp_file_path)
-            logging.debug("Removed temp file")
-        return result["language"], result["text"]
-
-    def _get_file_from_minio(self, object_name: str) -> str:
-        logging.info("get object from S3")
-        try:
-            object_data = self.minio_client.get_object(self.bucket, object_name)
-
-            logging.debug("read object data into memory")
-            object_bytes = object_data.data
-        finally:
-            object_data.close()
-            object_data.release_conn()
-
-        logging.debug("Create a temporary file and write the object bytes")
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(object_bytes)
-            temp_file_path = temp_file.name
-            return temp_file_path
+            logging.info("Starting transcription...")
+            result = self.model.transcribe(audio_file_path, fp16=False, verbose=True)
+            return result["language"], result["text"]
+        except Exception as e:
+            logging.error(f"Could not transcribe the file error: {e}")
+            return
 
 
 if __name__ == "__main__":
@@ -58,14 +26,12 @@ if __name__ == "__main__":
 
     from dotenv import load_dotenv
 
-    dotenv_path = Path("../.env.local")
+    dotenv_path = Path("../.env")
     load_dotenv(dotenv_path=dotenv_path)
 
-    # Configure logging
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-    transcriber = WhisperTranscriber(
-        model_name="large",
+    minio_client = MinioClient(
         minio_endpoint=os.getenv("MINIO_ENDPOINT"),
         minio_access_key=os.getenv("MINIO_ACCESS_KEY"),
         minio_secret_key=os.getenv("MINIO_SECRET_KEY"),
@@ -73,6 +39,10 @@ if __name__ == "__main__":
         minio_use_ssl=bool(int(os.getenv("MINIO_USE_SSL"))),
     )
 
-    language, text = transcriber.transcribe_audio("audio.mp3")
+    transcriber = WhisperTranscriber(model_name="large")
+    audio_file = save_temp_file(minio_client.get_object("audio.mp3"))
+    language, text = transcriber.transcribe_audio_file(audio_file_path=audio_file)
+    remove_temp_file(audio_file)
+
     logging.info(f"Detected language: {language}")
     logging.info(f"Recognized text: {text}")
