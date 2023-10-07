@@ -1,0 +1,14 @@
+services:
+  whisper-api:
+    container_name: whisper-api
+    env_file: /var/whisper/.env
+    image: dzailz/whisper-api:${VERSION}
+    ports:
+      - 8000:8000
+    volumes:
+      - "${MODELS_FOLDER}:/root/.cache/whisper/"
+      - /var/whisper/logs/:/var/log/
+    healthcheck:
+      test: ["CMD", "curl", "--output", "/dev/null", "--silent", "--get", "http://127.0.0.1:8000"]
+      retries: 10
+      timeout: 3s
