@@ -3,6 +3,7 @@ import os
 
 import whisper
 
+from api.spec.transcribe import WhisperModels
 from connectors import remove_temp_file, save_temp_file
 from connectors.minio_connector import MinioClient
 
@@ -39,7 +40,7 @@ if __name__ == "__main__":
         minio_use_ssl=bool(int(os.getenv("MINIO_USE_SSL"))),
     )
 
-    transcriber = WhisperTranscriber(model_name="large")
+    transcriber = WhisperTranscriber(model_name=WhisperModels.large_v2)
     audio_file = save_temp_file(minio_client.get_object("audio.mp3"))
     language, text = transcriber.transcribe_audio_file(audio_file_path=audio_file)
     remove_temp_file(audio_file)
