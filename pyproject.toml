@@ -17,9 +17,12 @@ python-dotenv = "1.0.0"
 llvmlite = "^0.41.0"
 numba = "^0.58.0"
 torch = { version = "2.1.0", source = "torch" }
-sqlalchemy = "^2.0.21"
+sqlalchemy = "^2.0.22"
 pydub = "^0.25.1"
 eyed3 = "^0.9.7"
+python-decouple = "^3.8"
+librosa = "^0.10.1"
+psycopg2-binary = "^2.9.9"
 
 [[tool.poetry.source]]
 name = "torch"
