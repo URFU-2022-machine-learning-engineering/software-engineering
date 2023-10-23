@@ -4,7 +4,7 @@ services:
     env_file: /var/whisper/.env
     image: dzailz/whisper-api:${VERSION}
     ports:
-      - 8000:8000
+      - "8000:8000"
     volumes:
       - "${MODELS_FOLDER}:/root/.cache/whisper/"
       - /var/whisper/logs/:/var/log/
@@ -12,3 +12,37 @@ services:
       test: ["CMD", "curl", "--output", "/dev/null", "--silent", "--get", "http://127.0.0.1:8000"]
       retries: 10
       timeout: 3s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_HOST: ${DB_HOST}
+      POSTGRES_PORT: ${DB_PORT}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - /var/whisper/data/:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -d ${DB_NAME}'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+
+  sql-migrations:
+    image: dzailz/whisper-api-migrations:${MIGRATIONS_VERSION}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}}@postgres:5432/${DB_NAME}
+    command: ["psql", "-h", "postgres", "-U", "${DB_USER}", "-d", "${DB_NAME}", "-a", "-f", "/docker-entrypoint-initdb.d/create_tables.sql"]
