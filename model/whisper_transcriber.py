@@ -1,5 +1,4 @@
 import logging
-import os
 
 import whisper
 
@@ -23,21 +22,16 @@ class WhisperTranscriber:
 
 
 if __name__ == "__main__":
-    from pathlib import Path
-
-    from dotenv import load_dotenv
-
-    dotenv_path = Path("../.env")
-    load_dotenv(dotenv_path=dotenv_path)
+    import settings
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     minio_client = MinioClient(
-        minio_endpoint=os.getenv("MINIO_ENDPOINT"),
-        minio_access_key=os.getenv("MINIO_ACCESS_KEY"),
-        minio_secret_key=os.getenv("MINIO_SECRET_KEY"),
-        minio_bucket=os.getenv("MINIO_BUCKET"),
-        minio_use_ssl=bool(int(os.getenv("MINIO_USE_SSL"))),
+        minio_endpoint=settings.MINIO_ENDPOINT,
+        minio_access_key=settings.MINIO_ACCESS_KEY,
+        minio_secret_key=settings.MINIO_SECRET_KEY,
+        minio_bucket=settings.MINIO_BUCKET,
+        minio_use_ssl=settings.MINIO_USE_SSL,
     )
 
     transcriber = WhisperTranscriber(model_name=WhisperModels.large_v2)
