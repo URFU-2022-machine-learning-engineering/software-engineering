@@ -1,9 +1,10 @@
 # Transcription Service
 
 This project is a transcription service built using FastAPI. It transcribes audio files using the WhisperTranscriber model.
+
 ## Installation
 
-1. Clone the repository: git clone https://github.com/URFU-2022-machine-learning-engineering/whisper-speech-recogniniton.git
+1. Clone the repository: git clone <https://github.com/URFU-2022-machine-learning-engineering/whisper-speech-recogniniton.git>
 2. Navigate to the project directory: `cd whisper-speech-recogniniton`
 3. Install Poetry (if not already installed): [Poetry Installation Guide](https://python-poetry.org/docs/)
 4. Install the project dependencies using Poetry: poetry install
@@ -18,27 +19,32 @@ MINIO_ACCESS_KEY=<MinIO access key>
 MINIO_SECRET_KEY=<MinIO secret key>
 ```
 
-Make sure to replace <MinIO endpoint URL>, <MinIO access key>, and <MinIO secret key> with your actual MinIO configuration.
+Make sure to replace `MinIO endpoint URL`, `MinIO access key`, and `MinIO secret key` with your actual MinIO configuration.
+
 ## Usage
 
-    Run the application: python main.py
-    Open your browser and navigate to http://localhost:8000 to check if the service is running. You should see a message saying "ready to transcribe."
+- Run the application: `poetry run uvicorn main:app`
+- Open your browser and navigate to <http://localhost:8000> to check if the service is running. You should see a message saying "ready to transcribe."
 
 ## API Endpoints
+
 ### Transcribe
 
 #### Endpoint: `/transcribe`
 
 #### Method: `POST`
 
-#### Request Body:
+#### Request Body
+
 ```json
 {
   "bucket": "audio-bucket",
   "file_name": "audio-file.mp3"
 }
 ```
-#### Response:
+
+#### Response
+
 ```json
 {
   "detected_language": "en",
@@ -46,7 +52,8 @@ Make sure to replace <MinIO endpoint URL>, <MinIO access key>, and <MinIO secret
 }
 ```
 
-#### Status Codes:
+#### Status Codes
+
 - 200: Successful transcription
 - 400: Bad request
 - 500: Internal server error
