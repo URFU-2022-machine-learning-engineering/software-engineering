@@ -17,6 +17,8 @@ class BasicAudioInfo(Base):
     size = Column(Integer)
     bitrate = Column(Integer)
     samplerate = Column(Integer)
+    id3_tags = relationship("ID3Tags", back_populates="basic_audio_info")
+    audio_features = relationship("AudioFeatures", back_populates="basic_audio_info")
 
 
 class ID3Tags(Base):
@@ -32,7 +34,7 @@ class ID3Tags(Base):
     language = Column(String)
     mood = Column(String)
     instrumentation = Column(String)
-    basic_audio_info = relationship("BasicAudioInfo")
+    basic_audio_info = relationship("BasicAudioInfo", back_populates="id3_tags")
 
 
 class AudioFeatures(Base):
@@ -48,7 +50,7 @@ class AudioFeatures(Base):
     spectral_contrast = Column(ARRAY(Float))
     rmse = Column(ARRAY(Float))
     tempo = Column(Float)
-    basic_audio_info = relationship("BasicAudioInfo")
+    basic_audio_info = relationship("BasicAudioInfo", back_populates="audio_features")
 
 
 def save_audio_info_to_db(audio_info: dict):
@@ -60,7 +62,9 @@ def save_audio_info_to_db(audio_info: dict):
         port=settings.DB_PORT,
         database=settings.DB_NAME,
     )
+
     engine = create_engine(url=connection_url)
+
     with Session(engine) as session:
         # Save basic audio information
         basic_info = BasicAudioInfo(
@@ -70,6 +74,8 @@ def save_audio_info_to_db(audio_info: dict):
             bitrate=audio_info["bitrate"],
             samplerate=audio_info["samplerate"],
         )
+        session.add(basic_info)
+        session.commit()
 
         # Save ID3 tags
         id3_tags = ID3Tags(
@@ -97,5 +103,5 @@ def save_audio_info_to_db(audio_info: dict):
             tempo=audio_info["tempo"],
         )
 
-        session.add_all([basic_info, id3_tags, audio_features])
+        session.add_all([id3_tags, audio_features])
         session.commit()
