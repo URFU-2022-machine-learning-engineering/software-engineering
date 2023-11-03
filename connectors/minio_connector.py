@@ -1,4 +1,5 @@
 import logging
+from typing import Iterable
 
 from minio import Minio
 
@@ -19,6 +20,19 @@ class MinioClient:
             secure=minio_use_ssl,
         )
         self.bucket = minio_bucket
+
+    def get_list_of_objects(self) -> Iterable:
+        """
+        Returns a list of objects in the bucket
+        :returns: Iterable
+        """
+        objects = []
+        try:
+            logging.debug("Trying to get a list of objects from minIO")
+            objects = self.client.list_objects(self.bucket)
+        except Exception as e:
+            logging.error(f"Error getting a list of objects: {e}")
+        return objects
 
     def get_object(self, object_name: str) -> bytes:
         object_data = None
