@@ -5,10 +5,9 @@ import eyed3
 import librosa
 from pydub import AudioSegment
 
-import settings
-from connectors import save_temp_file
-from connectors.minio_connector import MinioClient
-from connectors.postgres import save_audio_info_to_db
+from src.adapters import save_temp_file
+from src.adapters.db.postgres import save_audio_info_to_db
+from src.adapters.s3.minio_connector import MinioClient
 
 
 class AudioInfo:
@@ -84,12 +83,20 @@ class AudioInfo:
 if __name__ == "__main__":
     from random import choice
 
+    from src.settings.s3_settings import (
+        MINIO_ACCESS_KEY,
+        MINIO_BUCKET,
+        MINIO_ENDPOINT,
+        MINIO_SECRET_KEY,
+        MINIO_USE_SSL,
+    )
+
     minio_client = MinioClient(
-        minio_endpoint=settings.MINIO_ENDPOINT,
-        minio_access_key=settings.MINIO_ACCESS_KEY,
-        minio_secret_key=settings.MINIO_SECRET_KEY,
-        minio_bucket=settings.MINIO_BUCKET,
-        minio_use_ssl=settings.MINIO_USE_SSL,
+        minio_endpoint=MINIO_ENDPOINT,
+        minio_access_key=MINIO_ACCESS_KEY,
+        minio_secret_key=MINIO_SECRET_KEY,
+        minio_bucket=MINIO_BUCKET,
+        minio_use_ssl=MINIO_USE_SSL,
     )
     objects_list = [o.object_name for o in minio_client.get_list_of_objects()]
     FILENAME = choice(objects_list)

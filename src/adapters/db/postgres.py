@@ -3,11 +3,12 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import Session, declarative_base, relationship
 
-import settings
+from src.settings.db_settings import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER
 
 Base = declarative_base()
 
 
+# TODO: Move table representation classes to separate files
 class BasicAudioInfo(Base):
     __tablename__ = "basic_audio_info"
 
@@ -53,14 +54,15 @@ class AudioFeatures(Base):
     basic_audio_info = relationship("BasicAudioInfo", back_populates="audio_features")
 
 
+# TODO: Create a separate class for DB connection
 def save_audio_info_to_db(audio_info: dict):
     connection_url = URL.create(
         drivername="postgresql+psycopg2",
-        username=settings.DB_USER,
-        password=settings.DB_PASSWORD,
-        host=settings.DB_HOST,
-        port=settings.DB_PORT,
-        database=settings.DB_NAME,
+        username=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT,
+        database=DB_NAME,
     )
 
     engine = create_engine(url=connection_url)

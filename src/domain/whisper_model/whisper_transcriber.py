@@ -2,9 +2,9 @@ import logging
 
 import whisper
 
-from api.spec.transcribe import WhisperModels
-from connectors import remove_temp_file, save_temp_file
-from connectors.minio_connector import MinioClient
+from src.adapters import remove_temp_file, save_temp_file
+from src.adapters.api.spec.transcribe import WhisperModels
+from src.adapters.s3.minio_connector import MinioClient
 
 
 class WhisperTranscriber:
@@ -22,16 +22,22 @@ class WhisperTranscriber:
 
 
 if __name__ == "__main__":
-    import settings
+    from src.settings.s3_settings import (
+        MINIO_ACCESS_KEY,
+        MINIO_BUCKET,
+        MINIO_ENDPOINT,
+        MINIO_SECRET_KEY,
+        MINIO_USE_SSL,
+    )
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     minio_client = MinioClient(
-        minio_endpoint=settings.MINIO_ENDPOINT,
-        minio_access_key=settings.MINIO_ACCESS_KEY,
-        minio_secret_key=settings.MINIO_SECRET_KEY,
-        minio_bucket=settings.MINIO_BUCKET,
-        minio_use_ssl=settings.MINIO_USE_SSL,
+        minio_endpoint=MINIO_ENDPOINT,
+        minio_access_key=MINIO_ACCESS_KEY,
+        minio_secret_key=MINIO_SECRET_KEY,
+        minio_bucket=MINIO_BUCKET,
+        minio_use_ssl=MINIO_USE_SSL,
     )
 
     transcriber = WhisperTranscriber(model_name=WhisperModels.large_v2)

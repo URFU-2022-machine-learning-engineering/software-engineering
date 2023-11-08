@@ -2,11 +2,20 @@ import logging
 
 from fastapi import APIRouter, Response, status
 
-import settings
-from api.spec.transcribe import TranscribeRequest, TranscribeResponse, WhisperModels
-from connectors import remove_temp_file, save_temp_file
-from connectors.minio_connector import MinioClient
-from model import WhisperTranscriber
+from src.adapters import remove_temp_file, save_temp_file
+from src.adapters.api.spec.transcribe import (
+    TranscribeRequest,
+    TranscribeResponse,
+    WhisperModels,
+)
+from src.adapters.s3.minio_connector import MinioClient
+from src.domain.whisper_model import WhisperTranscriber
+from src.settings.s3_settings import (
+    MINIO_ACCESS_KEY,
+    MINIO_ENDPOINT,
+    MINIO_SECRET_KEY,
+    MINIO_USE_SSL,
+)
 
 router = APIRouter()
 
@@ -21,15 +30,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 )
 def transcribe(req: TranscribeRequest, response: Response) -> TranscribeResponse | None:
     audio_file = None
-    logging.debug(f"minio_endpoint: {settings.MINIO_ENDPOINT}, use ssl is {settings.MINIO_USE_SSL}")
+    logging.debug(f"minio_endpoint: {MINIO_ENDPOINT}, use ssl is {MINIO_USE_SSL}")
     try:
         logging.debug(f"Received request {req}")
         minio_client = MinioClient(
-            minio_endpoint=settings.MINIO_ENDPOINT,
-            minio_access_key=settings.MINIO_ACCESS_KEY,
-            minio_secret_key=settings.MINIO_SECRET_KEY,
+            minio_endpoint=MINIO_ENDPOINT,
+            minio_access_key=MINIO_ACCESS_KEY,
+            minio_secret_key=MINIO_SECRET_KEY,
             minio_bucket=req.bucket,
-            minio_use_ssl=settings.MINIO_USE_SSL,
+            minio_use_ssl=MINIO_USE_SSL,
         )
 
         whisper = WhisperTranscriber(model_name=req.model if req.model else WhisperModels.medium)
