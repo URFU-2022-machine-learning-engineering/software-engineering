@@ -40,12 +40,13 @@ jobs:
 
   deploy_latest:
     name: Deploy the latest image to the server
+    needs: push_to_registry
     runs-on: self-hosted
     steps:
       - name: Pull the latest image
         run: docker pull ${{ vars.IMAGE }}
       - name: Run the container
-        run: >
+        run: |
           docker run -d \
           --env-file /var/whisper/.env \
           --name ${{ vars.CONTAINER_NAME }} \
@@ -55,12 +56,13 @@ jobs:
 
   test_deployed:
     name: Test the deployed image
+    needs: deploy_latest
     runs-on: self-hosted
     steps:
       - name: Check if the container is running
         run: docker ps | grep ${{ vars.CONTAINER_NAME }}
       - name: Check if container is available on port 8000
-        run: >
+        run: |
           attempt_counter=0
           max_attempts=10
 
