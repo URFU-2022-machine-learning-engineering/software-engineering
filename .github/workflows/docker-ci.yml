@@ -42,10 +42,6 @@ jobs:
     name: Deploy the latest image to the server
     runs-on: self-hosted
     steps:
-      - name: Stop the container
-        run: docker stop ${{ vars.CONTAINER_NAME }}
-      - name: Remove the container
-        run: docker rm ${{ vars.CONTAINER_NAME }}
       - name: Pull the latest image
         run: docker pull ${{ vars.IMAGE }}
       - name: Run the container
