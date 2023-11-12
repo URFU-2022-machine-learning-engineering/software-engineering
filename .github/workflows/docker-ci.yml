@@ -1,6 +1,8 @@
-name: Docker Image CI
+name: Docker Image CI/CD
 
 on:
+  pull_request:
+    branches: [ "main" ]
   push:
     branches: [ "main" ]
 
@@ -34,3 +36,43 @@ jobs:
             ${{ steps.meta.outputs.tags }}
             dzailz/whisper-api:latest
           labels: ${{ steps.meta.outputs.labels }}
+
+
+  deploy_latest:
+    name: Deploy the latest image to the server
+    needs: push_to_registry
+    runs-on: self-hosted
+    steps:
+      - name: Pull the latest image
+        run: docker pull ${{ vars.IMAGE }}
+      - name: Run the container
+        run: |
+          docker run -d \
+          --env-file /var/whisper/.env \
+          --name ${{ vars.CONTAINER_NAME }} \
+          --volume ${{ vars.MODELS_FOLDER }}:/root/.cache/whisper/ \
+          --volume /var/whisper/logs/:/var/log/whisper.log -p 8000:8000 \
+          --rm ${{ vars.IMAGE }}
+
+  test_deployed:
+    name: Test the deployed image
+    needs: deploy_latest
+    runs-on: self-hosted
+    steps:
+      - name: Check if the container is running
+        run: docker ps | grep ${{ vars.CONTAINER_NAME }}
+      - name: Check if container is available on port 8000
+        run: |
+          attempt_counter=0
+          max_attempts=10
+
+          until { curl --output /dev/null --silent --get --fail http://127.0.0.1:8000; } do
+              if [ ${attempt_counter} -eq ${max_attempts} ];then
+                echo "Max attempts reached"
+                exit 1
+              fi
+
+              printf '.'
+              attempt_counter=$((attempt_counter + 1))
+              sleep 1
+          done
