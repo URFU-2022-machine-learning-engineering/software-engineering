@@ -8,4 +8,3 @@ README.md
 setup.cfg
 .pre-commit-config.yaml
 .gitignore
-Jenkinsfile
