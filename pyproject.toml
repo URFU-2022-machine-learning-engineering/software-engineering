@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-openai-whisper = "^20230918"
+openai-whisper = "^20231106"
 minio = "7.1.17"
 fastapi = "0.104.1"
 uvicorn = "0.23.2"

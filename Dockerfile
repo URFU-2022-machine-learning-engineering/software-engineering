@@ -4,7 +4,7 @@ LABEL author="Vladimir Katin"
 
 ENV HOST="0.0.0.0"
 ENV PORT="8000"
-ENV POETRY_VERSION="1.6.1"
+ENV POETRY_VERSION="1.7.1"
 
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \

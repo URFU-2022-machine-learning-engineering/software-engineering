@@ -2,9 +2,7 @@ import logging
 
 import whisper
 
-from src.adapters import remove_temp_file, save_temp_file
 from src.adapters.api.spec.transcribe import WhisperModels
-from src.adapters.s3.minio_connector import MinioClient
 
 
 class WhisperTranscriber:
@@ -22,6 +20,8 @@ class WhisperTranscriber:
 
 
 if __name__ == "__main__":
+    from src.adapters import remove_temp_file, save_temp_file
+    from src.adapters.s3.minio_connector import MinioClient
     from src.settings.s3_settings import (
         MINIO_ACCESS_KEY,
         MINIO_BUCKET,

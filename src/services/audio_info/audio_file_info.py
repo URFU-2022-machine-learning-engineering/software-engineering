@@ -98,7 +98,7 @@ if __name__ == "__main__":
         minio_bucket=MINIO_BUCKET,
         minio_use_ssl=MINIO_USE_SSL,
     )
-    objects_list = [o.object_name for o in minio_client.get_list_of_objects()]
+    objects_list = [obj.object_name for obj in minio_client.get_list_of_objects()]
     FILENAME = choice(objects_list)
     FILEPATH = save_temp_file(minio_client.get_object(FILENAME), prefix=FILENAME)
 
