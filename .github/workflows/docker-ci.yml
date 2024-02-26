@@ -59,7 +59,7 @@ jobs:
     steps:
       - name: Pull and Run the latest image
         run: |
-          docker pull dzailz/whisper-api:${{ needs.push_to_registry.outputs.tag }}
+          docker pull {{ vars.IMAGE }}
           docker run -d \
             --env-file ${{ vars.ENV_FILE }} \
             --name ${{ vars.CONTAINER_NAME }} \
