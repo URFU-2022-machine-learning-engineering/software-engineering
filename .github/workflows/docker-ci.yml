@@ -59,13 +59,13 @@ jobs:
     steps:
       - name: Pull and Run the latest image
         run: |
-          docker pull {{ vars.IMAGE }}
+          docker pull ${{ vars.IMAGE }}
           docker run -d \
             --env-file ${{ vars.ENV_FILE }} \
             --name ${{ vars.CONTAINER_NAME }} \
             --volume ${{ vars.MODELS_FOLDER }}:/root/.cache/whisper/ \
             -p ${{ vars.OUT_PORT }}:8000 \
-            --rm {{ vars.IMAGE }}
+            --rm ${{ vars.IMAGE }}
 
   test_deployed:
     name: Test the deployed image
