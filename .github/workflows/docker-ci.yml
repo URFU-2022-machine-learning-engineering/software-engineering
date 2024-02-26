@@ -61,9 +61,9 @@ jobs:
         run: |
           docker pull dzailz/whisper-api:${{ needs.push_to_registry.outputs.tag }}
           docker run -d \
-            --env-file .env \
-            --name whisper-container \
-            --volume /path/to/models:/root/.cache/whisper/ \
+            --env-file ${{ vars.ENV_FILE }} \
+            --name ${{ vars.CONTAINER_NAME }} \
+            --volume ${{ vars.MODELS_FOLDER }}:/root/.cache/whisper/ \
             -p 8000:8000 \
             --rm dzailz/whisper-api:${{ needs.push_to_registry.outputs.tag }}
 
@@ -74,6 +74,19 @@ jobs:
     steps:
       - name: Check if the container is running and available on port 8000
         run: |
+          attempt_counter=0
+          max_attempts=10
+
+          until { curl --output /dev/null --silent --get --fail http://127.0.0.1:8000; } do
+              if [ ${attempt_counter} -eq ${max_attempts} ];then
+                echo "Max attempts reached"
+                exit 1
+              fi
+
+              printf '.'
+              attempt_counter=$((attempt_counter + 1))
+              sleep 1
+          done
           if ! docker ps | grep -q whisper-container; then
             echo "Container is not running"
             exit 1
