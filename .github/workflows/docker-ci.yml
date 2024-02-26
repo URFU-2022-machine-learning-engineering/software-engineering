@@ -64,20 +64,20 @@ jobs:
             --env-file ${{ vars.ENV_FILE }} \
             --name ${{ vars.CONTAINER_NAME }} \
             --volume ${{ vars.MODELS_FOLDER }}:/root/.cache/whisper/ \
-            -p 8000:8000 \
-            --rm dzailz/whisper-api:${{ needs.push_to_registry.outputs.tag }}
+            -p ${{ vars.OUT_PORT }}:8000 \
+            --rm {{ vars.IMAGE }}
 
   test_deployed:
     name: Test the deployed image
     needs: deploy_latest
     runs-on: [self-hosted, linux, x64, whisper]
     steps:
-      - name: Check if the container is running and available on port 8000
+      - name: Check if the container is running and available on port ${{ vars.OUT_PORT }}
         run: |
           attempt_counter=0
           max_attempts=10
 
-          until { curl --output /dev/null --silent --get --fail http://127.0.0.1:8000; } do
+          until { curl --output /dev/null --silent --get --fail http://127.0.0.1:${{ vars.OUT_PORT }}; } do
               if [ ${attempt_counter} -eq ${max_attempts} ];then
                 echo "Max attempts reached"
                 exit 1
@@ -91,7 +91,7 @@ jobs:
             echo "Container is not running"
             exit 1
           fi
-          if ! curl --output /dev/null --silent --head --fail http://127.0.0.1:8000; then
-            echo "Container is not responding on port 8000"
+          if ! curl --output /dev/null --silent --head --fail http://127.0.0.1:${{ vars.OUT_PORT }}; then
+            echo "Container is not responding on port ${{ vars.OUT_PORT }}"
             exit 1
           fi
