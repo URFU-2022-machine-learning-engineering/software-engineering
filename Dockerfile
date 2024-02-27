@@ -26,4 +26,5 @@ RUN pip install poetry==$POETRY_VERSION  \
 
 EXPOSE $PORT
 
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "$HOST", "--port", "$PORT"]
+CMD poetry run uvicorn main:app --host $HOST --port $PORT
+
