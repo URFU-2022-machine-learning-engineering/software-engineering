@@ -72,6 +72,12 @@ jobs:
     needs: deploy_latest
     runs-on: [self-hosted, linux, x64, whisper]
     steps:
+      - name: Check if the container started
+        run: |
+          if ! docker ps | grep -q  ${{ vars.CONTAINER_NAME }}; then
+            echo "Container is not running"
+            exit 1
+          fi
       - name: Check if the container is running and available on port ${{ vars.OUT_PORT }}
         run: |
           attempt_counter=0
@@ -87,11 +93,4 @@ jobs:
               attempt_counter=$((attempt_counter + 1))
               sleep 1
           done
-          if ! docker ps | grep -q whisper-container; then
-            echo "Container is not running"
-            exit 1
-          fi
-          if ! curl --output /dev/null --silent --head --fail http://127.0.0.1:${{ vars.OUT_PORT }}; then
-            echo "Container is not responding on port ${{ vars.OUT_PORT }}"
-            exit 1
-          fi
+            echo "Container is running and available on port ${{ vars.OUT_PORT }}"
