@@ -38,6 +38,9 @@ def transcribe(req: TranscribeRequest) -> TranscribeResponse | None:
     except TypeError as err:
         logging.error(f"Could not initialize WT. Error was: {err}")
         return
-    language, text = whisper.transcribe_audio(object_name=req.file_name)
-
+    try:
+        language, text = whisper.transcribe_audio(object_name=req.file_name)
+    except Exception as e:
+        logging.error(f"Could not transcribe audio. Error was: {e}")
+        return status.HTTP_500_INTERNAL_SERVER_ERROR
     return TranscribeResponse(detected_language=language, recognized_text=text)

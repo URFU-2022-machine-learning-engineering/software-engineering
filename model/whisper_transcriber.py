@@ -16,7 +16,8 @@ class WhisperTranscriber:
         minio_bucket: str,
         minio_use_ssl: bool | str,
     ):
-        self.model = whisper.load_model(model_name)
+        self.model_name = model_name
+        self.model = self.model_load()
         self.minio_client = Minio(
             minio_endpoint,
             access_key=minio_access_key,
@@ -25,6 +26,10 @@ class WhisperTranscriber:
         )
         self.bucket = minio_bucket
 
+    def model_load(self):
+        logging.info("Load model")
+        return whisper.load_model(self.model_name)
+
     def transcribe_audio(self, object_name: str) -> tuple[str, str]:
         temp_file_path = self._get_file_from_minio(object_name)
         try:
@@ -32,18 +37,23 @@ class WhisperTranscriber:
             result = self.model.transcribe(temp_file_path, fp16=False)
         finally:
             os.remove(temp_file_path)
-            logging.debug("Removed temp file")
+            logging.info("Removed temp file")
         return result["language"], result["text"]
 
-    def _get_file_from_minio(self, object_name: str) -> str:
+    def _get_file_from_minio(self, object_name: str) -> str | None:
         logging.info("get object from S3")
         try:
             object_data = self.minio_client.get_object(self.bucket, object_name)
 
             logging.debug("read object data into memory")
             object_bytes = object_data.data
-        finally:
+        except Exception as e:
+            logging.error(f"Could not get object from S3. Error was: {e}")
+            return
+        else:
+            logging.debug("Successfully read object data into memory")
             object_data.close()
+        finally:
             object_data.release_conn()
 
         logging.debug("Create a temporary file and write the object bytes")
@@ -58,11 +68,10 @@ if __name__ == "__main__":
 
     from dotenv import load_dotenv
 
-    dotenv_path = Path("../.env.local")
+    dotenv_path = Path("/var/whisper/.env.local")
     load_dotenv(dotenv_path=dotenv_path)
 
-    # Configure logging
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
     transcriber = WhisperTranscriber(
         model_name="large",
