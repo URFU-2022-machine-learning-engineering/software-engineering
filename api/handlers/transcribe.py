@@ -8,7 +8,7 @@ from model import WhisperTranscriber
 
 router = APIRouter()
 
-model_name = "large"
+model_name = "medium"
 minio_endpoint = os.getenv("MINIO_ENDPOINT")
 minio_access_key = os.getenv("MINIO_ACCESS_KEY")
 minio_secret_key = os.getenv("MINIO_SECRET_KEY")
