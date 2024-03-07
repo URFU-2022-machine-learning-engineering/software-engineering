@@ -65,7 +65,7 @@ jobs:
             --name ${{ vars.CONTAINER_NAME }} \
             --volume ${{ vars.MODELS_FOLDER }}:/root/.cache/whisper/ \
             -p ${{ vars.OUT_PORT }}:8000 \
-            --rm ${{ vars.IMAGE }}
+            --rm --restart unless-stopped ${{ vars.IMAGE }}
 
   test_deployed:
     name: Test the deployed image
