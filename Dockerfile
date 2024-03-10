@@ -33,5 +33,5 @@ COPY ./api ./api
 COPY ./main.py ./main.py
 
 EXPOSE $PORT
-# remove --proxy-headers if you don't have a proxy in front of your app
+# remove --proxy-headers if you don't have a proxy
 CMD uvicorn main:app --proxy-headers --host $HOST --port $PORT

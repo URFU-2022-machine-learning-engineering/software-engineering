@@ -1,0 +1,23 @@
+FROM nvcr.io/nvidia/pytorch:24.02-py3
+
+WORKDIR /app
+
+ENV HOST="0.0.0.0" \
+    PORT="8000" \
+    PYTHONPATH="/app"
+
+RUN apt update -y \
+    && apt install -y --no-install-recommends ffmpeg \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY ./requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade openai-whisper
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY ./model ./model
+COPY ./api ./api
+COPY ./main.py ./main.py
+
+EXPOSE $PORT
+# --proxy-headers for nginx
+CMD uvicorn main:app --host $HOST --port $PORT
