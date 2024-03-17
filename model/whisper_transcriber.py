@@ -4,15 +4,14 @@ import tempfile
 
 import whisper
 from minio import Minio
-
 from opentelemetry import trace
+from opentelemetry.trace import StatusCode
 
 
 class WhisperTranscriber:
-    def __init__(self, model_name: str, minio_endpoint: str, minio_access_key: str, minio_secret_key: str,
-                 minio_bucket: str, minio_use_ssl: bool | str):
+    def __init__(self, model_name: str, minio_endpoint: str, minio_access_key: str, minio_secret_key: str, minio_bucket: str, minio_use_ssl: bool | str):
         self.tracer = trace.get_tracer(__name__)
-        with self.tracer.start_as_current_span("init_WhisperTranscriber"):
+        with self.tracer.start_as_current_span("Initialize WhisperTranscriber"):
             self.model_name = model_name
             self.model = self.model_load()
             self.minio_client = Minio(
@@ -24,12 +23,12 @@ class WhisperTranscriber:
             self.bucket = minio_bucket
 
     def model_load(self):
-        with self.tracer.start_as_current_span("model_load"):
+        with self.tracer.start_as_current_span("Load Whisper model"):
             logging.info(f"Load Whisper model, {self.model_name}")
             return whisper.load_model(self.model_name)
 
     def transcribe_audio(self, object_name: str) -> tuple[str, str]:
-        with self.tracer.start_as_current_span("transcribe_audio"):
+        with self.tracer.start_as_current_span("Transcribe audio"):
             temp_file_path = self._get_file_from_minio(object_name)
             if temp_file_path is None:
                 return "error", "Could not retrieve file"
@@ -42,13 +41,16 @@ class WhisperTranscriber:
             return result["language"], result["text"]
 
     def _get_file_from_minio(self, object_name: str) -> str | None:
-        with self.tracer.start_as_current_span("_get_file_from_minio"):
+        with self.tracer.start_as_current_span("Get file from minIO"):
             logging.info("Get object from S3")
             try:
                 object_data = self.minio_client.get_object(self.bucket, object_name)
                 logging.debug("Read object data into memory")
                 object_bytes = object_data.data
             except Exception as e:
+                current_tracer = trace.get_current_span()
+                current_tracer.record_exception(e)
+                current_tracer.set_status(status=StatusCode.ERROR, description=str(e))
                 logging.error(f"Could not get object from S3. Error was: {e}")
                 return
             else:
@@ -59,6 +61,8 @@ class WhisperTranscriber:
 
             logging.debug("Create a temporary file and write the object bytes")
             with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                current_tracer = trace.get_current_span()
+                current_tracer.add_event(name="Save temp file", attributes={"temp_file": temp_file.name})
                 temp_file.write(object_bytes)
                 temp_file_path = temp_file.name
                 return temp_file_path
