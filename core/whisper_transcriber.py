@@ -2,6 +2,7 @@ import logging
 import os
 import tempfile
 
+import torch
 import whisper
 from minio import Minio
 from opentelemetry import trace
@@ -23,21 +24,25 @@ class WhisperTranscriber:
             self.bucket = minio_bucket
 
     def model_load(self):
-        with self.tracer.start_as_current_span("Load Whisper model"):
-            logging.info(f"Load Whisper model, {self.model_name}")
+        with self.tracer.start_as_current_span("Load Whisper core"):
+            logging.info(f"Load Whisper core, {self.model_name}")
             return whisper.load_model(self.model_name)
 
     def transcribe_audio(self, object_name: str) -> tuple[str, str]:
+        is_cuda_available = torch.cuda.is_available()
+        logging.debug(f"Is CUDA available: {is_cuda_available}")
         with self.tracer.start_as_current_span("Transcribe audio"):
             temp_file_path = self._get_file_from_minio(object_name)
             if temp_file_path is None:
                 return "error", "Could not retrieve file"
             try:
                 logging.info("Start transcription")
-                result = self.model.transcribe(temp_file_path, fp16=True)
+                result = self.model.transcribe(temp_file_path, fp16=True if is_cuda_available else False)
             finally:
                 os.remove(temp_file_path)
                 logging.info("Removed temp file")
+                if is_cuda_available:
+                    torch.cuda.empty_cache()
             return result["language"], result["text"]
 
     def _get_file_from_minio(self, object_name: str) -> str | None:
@@ -87,6 +92,6 @@ if __name__ == "__main__":
         minio_use_ssl=bool(int(os.getenv("MINIO_USE_SSL"))),
     )
 
-    language, text = transcriber.transcribe_audio("audio.mp3")
+    language, text = transcriber.transcribe_audio("00239eb5-e493-11ee-af50-0242ac120006")
     logging.info(f"Detected language: {language}")
     logging.info(f"Recognized text: {text}")

@@ -1,21 +1,20 @@
 import logging
-import os
 
 from fastapi import APIRouter, HTTPException, status
 from opentelemetry import trace
 from opentelemetry.trace.status import Status, StatusCode
 
-from api.spec.transcribe import TranscribeRequest, TranscribeResponse
-from model import WhisperTranscriber
+from core import (
+    WhisperTranscriber,
+    minio_access_key,
+    minio_endpoint,
+    minio_secret_key,
+    minio_use_ssl,
+    model_name,
+)
+from ports.api.spec.transcribe import TranscribeRequest, TranscribeResponse
 
 router = APIRouter()
-
-# Configuration variables
-model_name = os.getenv("MODEL_NAME", "medium")
-minio_endpoint = os.getenv("MINIO_ENDPOINT")
-minio_access_key = os.getenv("MINIO_ACCESS_KEY")
-minio_secret_key = os.getenv("MINIO_SECRET_KEY")
-minio_use_ssl = os.getenv("MINIO_USE_SSL", "true").lower() in ("true", "1", "t")
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

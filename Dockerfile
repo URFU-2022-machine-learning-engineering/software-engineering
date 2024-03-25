@@ -28,8 +28,8 @@ RUN apt update -y \
 COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-COPY ./model ./model
-COPY ./api ./api
+COPY core ./model
+COPY ports/api ./api
 COPY ./main.py ./main.py
 
 EXPOSE $PORT
