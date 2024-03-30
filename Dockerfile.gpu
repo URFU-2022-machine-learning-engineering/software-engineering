@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./core ./core
 COPY ./ports ./ports
 COPY ./main.py ./main.py
+COPY ./settings.py ./settings.py
 
 EXPOSE $PORT
 # add --proxy-headers for NGINX
