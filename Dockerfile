@@ -1,7 +1,7 @@
-FROM python:3.11-slim as requirements-stage
+FROM python:3.12-slim as requirements-stage
 LABEL authors="Vladimir Katin"
 
-ARG POETRY_VERSION="1.7.1"
+ARG POETRY_VERSION="1.8.2"
 
 WORKDIR /tmp
 
